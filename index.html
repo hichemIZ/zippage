@@ -1,19 +1,48 @@
-<!---->
 <!DOCTYPE html>
 <html>
+<head>
+    <title>File Zipper Frontend</title>
+</head>
 <body>
-   
-<h1>The button form attribute</h1>
+    <h1>File Zipper</h1>
+    
+    <input type="file" id="fileInput" multiple>
+    <button id="zipButton">Zip Files</button>
+    <p id="output"></p>
 
+    <script>
+        document.getElementById('zipButton').addEventListener('click', async () => {
+            const input = document.getElementById('fileInput');
+            const files = input.files;
 
-<p>Test</p>
+            if (files.length === 0) {
+                document.getElementById('output').textContent = 'No files selected.';
+                return;
+            }
 
+            const formData = new FormData();
 
-<button type="button" value="Submit" onclick="zipfile()" >zip ici</button>
-<script type="module" src="./node_modules/7zip-bin/index.js"></script>
-<script type="module" src="./node_modules/uuid/dist/index.js"></script>
-<script type="module" src="./node_modules/7zip-bin/index.js"></script>
-<script src="zippage.js"></script>
-   
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            try {
+                const response = await fetch('/zipfiles', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('output').textContent = 'File compression successful. Download the compressed file: ' + data.filename;
+                } else {
+                    document.getElementById('output').textContent = 'File compression failed.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('output').textContent = 'An error occurred.';
+            }
+        });
+    </script>
 </body>
 </html>
